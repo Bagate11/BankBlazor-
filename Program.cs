@@ -1,19 +1,42 @@
-using Microsoft.AspNetCore.Components.Web;
-using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
-namespace BankBlazor.Client;
+using BankBlazor.API.Context;
+using Microsoft.EntityFrameworkCore;
 
-public class Program
+namespace BankBlazor.API
 {
-    public static async Task Main(string[] args)
+    public class Program
     {
-        var builder = WebAssemblyHostBuilder.CreateDefault(args);
-        builder.RootComponents.Add<App>("#app");
-        builder.RootComponents.Add<HeadOutlet>("head::after");
+        public static void Main(string[] args)
+        {
+             var builder = WebApplication.CreateBuilder(args);
 
-        builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
-        await builder.Build().RunAsync();
+
+
+            builder.Services.AddControllers();
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+
+            var connString = builder.Configuration.GetConnectionString("BankBlazor");
+            builder.Services.AddDbContext<BankBlazorContext>(options =>
+            options.UseSqlServer(connString));
+
+            var app = builder.Build();
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+
+            app.UseHttpsRedirection();
+
+            app.UseAuthorization();
+
+
+            app.MapControllers();
+
+            app.Run();
+        }
     }
 }
-//a
